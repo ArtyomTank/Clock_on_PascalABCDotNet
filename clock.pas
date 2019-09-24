@@ -86,6 +86,8 @@ procedure Dial(time: timeH); forward;
 procedure ChangeClock(sender: object; e: EventArgs);
 begin
   selectMode := 'Clock';
+  settingStopwatchGroup.Enabled := false;
+  settingTimerGroup.Enabled := false;
 end;
 
 procedure ChangeStopwatch(sender: object; e: EventArgs);
@@ -93,12 +95,16 @@ begin
   isStart := false;
   Dial(defaultTime);
   selectMode := 'Stopwatch';
+  settingStopwatchGroup.Enabled := true;
+  settingTimerGroup.Enabled := false;
 end;
 
 procedure ChangeTimer(sender: object; e: EventArgs);
 begin
   Dial(defaultTime);
   selectMode := 'Timer';
+  settingStopwatchGroup.Enabled := false;
+  settingTimerGroup.Enabled := true;
 end;
 
 
@@ -122,7 +128,7 @@ begin
   t.minute := (secondT div 60) mod 60;
   t.hour := ((secondT div 60) div 60) mod 24;
   outputStopwatch.Text := t.hour + 'h ' + t.minute + 'm ' + t.second + 's';
-  isStart:=false;
+  isStart := false;
   MessageBox.Show(t.hour + 'h ' + t.minute + 'm ' + t.second + 's');
   secondT := 0;
 end;
@@ -178,6 +184,7 @@ begin
   settingTimerGroup.Width := Round(allSetting.ClientSize.Width / 2);
   settingTimerGroup.Anchor := (AnchorStyles.left or AnchorStyles.Top);
   settingTimerGroup.BackColor := Color.White;
+  settingTimerGroup.Enabled := false;
   
   settingStopwatchGroup := new GroupBox();
   settingStopwatchGroup.Text := 'Option for Stopwatch';
@@ -185,6 +192,7 @@ begin
   settingStopwatchGroup.Width := Round(allSetting.ClientSize.Width / 2);
   settingStopwatchGroup.Anchor := (AnchorStyles.Right or AnchorStyles.Top);
   settingStopwatchGroup.BackColor := Color.White;
+  settingStopwatchGroup.Enabled := false;
   
   //controlls for timer
   for var i := 0 to 2 do
@@ -226,6 +234,7 @@ begin
   outputStopwatch := new System.Windows.Forms.Label();
   outputStopwatch.Top := 15 + 30;
   outputStopwatch.Width := 60;
+  
   
   f.Controls.Add(PaintBox);
   f.Menu := MenuC;
