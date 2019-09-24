@@ -7,3 +7,9 @@ It need for shool.
 Emmm
 
 end.
+
+<h>Warning</h>
+</br>
+<h>
+  DON'T READ THE "clock.pas"! THIS CODE IS VERY BAD!
+</h>
