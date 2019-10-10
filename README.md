@@ -1,4 +1,4 @@
-# Clock_on_PascalABCDotNet
+# Clock_on_PascalABC.Net
 #I'm russian!
 
 It's my first project!
