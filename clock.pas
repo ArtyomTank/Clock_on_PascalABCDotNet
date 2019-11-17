@@ -1,5 +1,16 @@
 ﻿{$reference 'System.Windows.Forms.dll'}
 {$reference 'System.Drawing.dll'} 
+{$reference 'System.ComponentModel.dll'}
+
+{$apptype windows}
+
+{$title Clock.NET}
+{$description "It's clock, timer, stopwatch"}
+{$product Clock.NET}
+{$version 1.0.0}
+{$company ArtyomTank}
+{$copyright ArtyomTank}
+
 
 uses System, System.Windows.Forms, System.Drawing, Timers;
 
@@ -13,8 +24,17 @@ type
     hour, minute, second: integer;
   end;
 
+  MainForm = class(Form)
+    public
+      components:System.ComponentModel.IContainer ;
+  end;
+  
 var
-  f: Form;
+  f: MainForm;
+  notIcon:NotifyIcon;
+  contextMenu_notIcon:ContextMenuStrip;
+  item_contextMenu_notIcon:array[0..2] of ToolStripMenuItem;
+  
   PaintBox := new Panel();
   canvas := PaintBox.CreateGraphics;
   MenuC: MainMenu;
@@ -134,6 +154,18 @@ begin
 end;
 
 
+procedure notIcon_Click(sender: object; e: MouseEventArgs);
+var 
+  arg:boolean;
+begin
+  arg := ((e.Button = MouseButtons.Left) and (f.WindowState = FormWindowState.Minimized));
+  if arg then
+    f.WindowState := FormWindowState.Normal
+  else 
+    f.WindowState := FormWindowState.Minimized
+end;
+
+
 procedure Init;
 var
   itemMenuTitle: array[0..2] of string := ('Clock', 'Timer', 'Stopwatch');
@@ -146,11 +178,51 @@ begin
   defaultTime.minute := 0;
   defaultTime.second := 0;
   
-  f := new Form;
-  f.Text := 'Clock';
+  //f
+  f := new MainForm;
+  f.Text := selectMode;
   f.ClientSize := new Size(PaintBoxSize, PaintBoxSize + 120);
   f.MinimumSize := new Size(PaintBoxSize, PaintBoxSize);
   f.FormBorderStyle := FormBorderStyle.FixedSingle;
+  f.WindowState := FormWindowState.Normal;
+  f.Icon := new Icon('icon.ico');
+  
+  f.Closed += (o,e)->begin notIcon.Visible := false end;
+  f.Resize += (o,e)->
+  begin 
+    if (f.WindowState = FormWindowState.Minimized) then
+      begin
+        notIcon.ShowBalloonTip(60);
+        notIcon.BalloonTipTitle := selectMode;
+        f.ShowInTaskbar := false;
+      end
+    else
+      begin
+        f.ShowInTaskbar := true;
+      end
+  end;
+  
+  //items_contextMenu_notIcon
+  item_contextMenu_notIcon[0] := new ToolStripMenuItem('Close', Image.FromFile('close.png'), (o,e)->f.Close());
+  item_contextMenu_notIcon[1] := new ToolStripMenuItem();
+  item_contextMenu_notIcon[2] := new ToolStripMenuItem();
+  
+  //contextMenu_notIcon
+  contextMenu_notIcon := new ContextMenuStrip();
+  contextMenu_notIcon.Items.Add(item_contextMenu_notIcon[0]);
+
+  //notIcon
+  f.components := new System.ComponentModel.Container();
+  notIcon := new NotifyIcon(f.components);
+  notIcon.ContextMenuStrip := contextMenu_notIcon;
+  notIcon.MouseClick += notIcon_Click;
+  notIcon.BalloonTipIcon := ToolTipIcon.Info;
+  notIcon.BalloonTipText := 'Нажмите, чтобы отобразить окно';
+  notIcon.Text := 'Показать';
+  notIcon.BalloonTipTitle := selectMode;
+  //notIcon.ShowBalloonTip(40);
+  notIcon.Icon := new Icon('notifyicon.ico');
+  notIcon.Visible := true;
   
   MenuC := new MainMenu();  
   for var i := 0 to 2 do
@@ -178,12 +250,13 @@ begin
   allSetting.BorderStyle := BorderStyle.Fixed3D;
   allSetting.Padding := new Padding(10);
   allSetting.Width := PaintBox.Width;
+  allSetting.Height := 110;
   
   settingTimerGroup := new GroupBox();
   settingTimerGroup.Text := 'Option for Timer';
   settingTimerGroup.Width := Round(allSetting.ClientSize.Width / 2);
   settingTimerGroup.Anchor := (AnchorStyles.left or AnchorStyles.Top);
-  settingTimerGroup.BackColor := Color.White;
+  settingTimerGroup.BackColor := Color.Wheat;
   settingTimerGroup.Enabled := false;
   
   settingStopwatchGroup := new GroupBox();
@@ -191,7 +264,7 @@ begin
   settingStopwatchGroup.Left := Round(allSetting.ClientSize.Width / 2);
   settingStopwatchGroup.Width := Round(allSetting.ClientSize.Width / 2);
   settingStopwatchGroup.Anchor := (AnchorStyles.Right or AnchorStyles.Top);
-  settingStopwatchGroup.BackColor := Color.White;
+  settingStopwatchGroup.BackColor := Color.Wheat;
   settingStopwatchGroup.Enabled := false;
   
   //controlls for timer
@@ -214,6 +287,7 @@ begin
     buttonTimer[i].Height := 20;
     buttonTimer[i].Text := ButtonTitle[i];
     buttonTimer[i].Click += controlTimer[i];
+    buttonTimer[i].BackColor := Color.White;
   end;
   changeNum[2].Maximum := 23;
   labelChangeNum[0].text := 'Second';
@@ -230,6 +304,7 @@ begin
     buttonStopwatch[i].Height := 20;
     buttonStopwatch[i].Text := ButtonTitle[i];
     buttonStopwatch[i].Click += controlStopwatch[i];
+    buttonStopwatch[i].BackColor := Color.White;
   end;
   outputStopwatch := new System.Windows.Forms.Label();
   outputStopwatch.Top := 15 + 30;
@@ -404,5 +479,6 @@ end;
 
 begin
   Init;
+  Application.EnableVisualStyles();
   Application.Run(f);
 end.
