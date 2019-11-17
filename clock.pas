@@ -482,3 +482,5 @@ begin
   Application.EnableVisualStyles();
   Application.Run(f);
 end.
+
+//finish
